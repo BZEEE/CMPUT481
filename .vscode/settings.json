@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "cstdlib": "cpp",
+        "random": "cpp",
+        "vector": "cpp"
+    }
+}

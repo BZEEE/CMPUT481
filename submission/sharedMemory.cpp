@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <time.h>
 #include <cstdlib>
 #include <pthread.h>
 #include <cmath>
@@ -7,6 +8,7 @@
 #include <vector>
 #include <iomanip>
 #include <algorithm>
+#include <random>
 
 // g++ sharedMemory.cpp -std=c++11 -lpthread
 
@@ -52,11 +54,13 @@ void *sortOnThread(void *threadData) {
 int main() {
     // generate a random array of 1 million integers
     // use time as the seed since it is a number that changes all the time
-    srandom(time(NULL));
-    const long int listSize = 10;
+    // default_random_engine generator;
+    srand(time(NULL));
+    
+    const long int listSize = 32000000;
     long int *array = new long int[listSize];
     for (long int i = 0; i < listSize; i++) {
-        array[i] = random();
+        array[i] = ((unsigned long int) (rand() * rand() * rand())) % 2147483647;
     }
 
     // display unsorted list
@@ -67,7 +71,7 @@ int main() {
     // cout << "\n";
 
     // set parameters
-    const long int numThreads = 2;
+    const long int numThreads = 16;
 	pthread_t phase1Threads [numThreads];
     struct thread_data phase1ThreadData[numThreads];
     // set start and end partition indices
@@ -170,11 +174,11 @@ int main() {
         }
     }
 
-    cout << "\nsup\n";
-    for (long int i = 1; i < numThreads; i++) {
-        merge(exchangedPartitions[0].begin(), exchangedPartitions[0].end(), exchangedPartitions[i].begin(), exchangedPartitions[i].end(), exchangedPartitions[0].begin());
-    }
-    cout << "\nbruh\n";
+    // cout << "\nsup\n";
+    // for (long int i = 1; i < numThreads; i++) {
+    //     merge(exchangedPartitions[0].begin(), exchangedPartitions[0].end(), exchangedPartitions[i].begin(), exchangedPartitions[i].end(), exchangedPartitions[0].begin());
+    // }
+    // cout << "\nbruh\n";
     // copy(exchangedPartitions[0].begin(), exchangedPartitions[0].end(), array[0]);
 
 
@@ -196,13 +200,13 @@ int main() {
     // this allows us to skip the merge step for phase 4, since
     // the exchanged partitions or sorted in place right next to each other
     // by each process
-    // long int mainMemoryCounter = 0;
-    // for (long int i = 0; i < numThreads; i++) {
-    //     for (long int j = 0; j < exchangedPartitions[i].size(); j++) {
-    //         array[mainMemoryCounter] = exchangedPartitions[i][j];
-    //         mainMemoryCounter++;
-    //     };
-    // }
+    long int mainMemoryCounter = 0;
+    for (long int i = 0; i < numThreads; i++) {
+        for (long int j = 0; j < exchangedPartitions[i].size(); j++) {
+            array[mainMemoryCounter] = exchangedPartitions[i][j];
+            mainMemoryCounter++;
+        };
+    }
 
     pthread_t phase3Threads [numThreads];
     struct thread_data phase3ThreadData[numThreads];
